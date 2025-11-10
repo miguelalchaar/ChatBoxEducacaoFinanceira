@@ -4,6 +4,12 @@ import com.oriento.api.dto.AskResponse;
 import com.oriento.api.model.Usuario;
 import com.oriento.api.repositories.UsuarioRepository;
 import com.oriento.api.services.GeminiService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
@@ -15,21 +21,23 @@ import org.springframework.web.server.ResponseStatusException;
 
 /**
  * Controller responsável por gerenciar endpoints relacionados ao assistente virtual Oriento.
- * 
+ *
  * O Oriento é um assistente de IA especializado em educação financeira e gestão
  * para pequenas e médias empresas (PMEs), utilizando a API do Google Gemini.
- * 
+ *
  * Endpoints disponíveis:
  * - POST /oriento/ask: Envia uma pergunta ao assistente Oriento e recebe uma resposta
- * 
+ *
  * Este controller atua como uma camada fina, delegando toda a lógica de processamento
  * para o GeminiService, mantendo a separação de responsabilidades.
- * 
+ *
  * O endpoint requer autenticação via JWT (configurado no AuthConfig), garantindo
  * que apenas usuários autenticados possam interagir com o assistente.
  */
 @RestController
 @RequestMapping("/oriento")
+@Tag(name = "Assistente Oriento", description = "Endpoints para interação com o assistente virtual de educação financeira")
+@SecurityRequirement(name = "Bearer Authentication")
 public class GeminiController {
 
     private static final Logger logger = LoggerFactory.getLogger(GeminiController.class);
@@ -54,7 +62,7 @@ public class GeminiController {
 
     /**
      * Endpoint para enviar perguntas ao assistente virtual Oriento.
-     * 
+     *
      * Este endpoint recebe uma pergunta do usuário sobre finanças empresariais
      * e retorna uma resposta gerada pelo assistente Oriento, especializado em
      * educação financeira para pequenas e médias empresas.
@@ -63,6 +71,24 @@ public class GeminiController {
      * @param conversationId Identificador da conversa para manter contexto (opcional)
      * @return Estrutura contendo a resposta gerada e o identificador da conversa
      */
+    @Operation(
+        summary = "Fazer pergunta ao Oriento",
+        description = "Envia uma pergunta sobre educação financeira para o assistente virtual Oriento e recebe uma resposta personalizada gerada por IA"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Resposta gerada com sucesso"
+        ),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Não autenticado - Token JWT necessário"
+        ),
+        @ApiResponse(
+            responseCode = "500",
+            description = "Erro ao processar a pergunta com a API do Gemini"
+        )
+    })
     @PostMapping("/ask")
     public AskResponse askGeminiApi(
             @RequestBody String prompt,

@@ -8,6 +8,12 @@ import com.oriento.api.model.Usuario;
 import com.oriento.api.services.AuthService;
 import com.oriento.api.services.JwtService;
 import com.oriento.api.services.RefreshTokenService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,15 +24,16 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Controller responsável por gerenciar endpoints de autenticação.
- * 
+ *
  * Endpoints disponíveis:
  * - POST /login: Autentica um usuário e retorna tokens JWT
  * - POST /refresh: Renova o access token usando um refresh token válido
- * 
+ *
  * Este controller atua como uma camada fina, delegando toda a lógica de negócio
  * para o AuthService, mantendo a separação de responsabilidades.
  */
 @RestController
+@Tag(name = "Autenticação", description = "Endpoints para autenticação e gerenciamento de tokens JWT")
 public class AuthController {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
@@ -94,18 +101,37 @@ public class AuthController {
 
     /**
      * Endpoint para autenticação de usuários.
-     * 
+     *
      * Este endpoint recebe as credenciais do usuário (email/CNPJ e senha),
      * valida as credenciais através do AuthService e retorna tokens JWT
      * para acesso à API.
-     * 
+     *
      * O IP do cliente é extraído automaticamente para auditoria e segurança.
-     * 
+     *
      * @param loginRequest DTO contendo email/CNPJ e senha do usuário
      * @param request Objeto HttpServletRequest para extrair informações da requisição
      * @return ResponseEntity com LoginResponse contendo accessToken, refreshToken e tempo de expiração
      * @throws BadCredentialsException se as credenciais forem inválidas (tratado pelo Spring)
      */
+    @Operation(
+        summary = "Autenticar usuário",
+        description = "Autentica um usuário usando email/CNPJ e senha, retornando tokens JWT (access token e refresh token)"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Login realizado com sucesso",
+            content = @Content(schema = @Schema(implementation = LoginResponse.class))
+        ),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Credenciais inválidas"
+        ),
+        @ApiResponse(
+            responseCode = "429",
+            description = "Limite de tentativas excedido (rate limit)"
+        )
+    })
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest,
                                                HttpServletRequest request) {
@@ -125,21 +151,36 @@ public class AuthController {
 
     /**
      * Endpoint para renovação de access token usando refresh token.
-     * 
+     *
      * Quando um access token expira, o cliente pode usar este endpoint
      * para obter um novo access token sem precisar fazer login novamente,
      * desde que o refresh token ainda seja válido.
-     * 
+     *
      * Fluxo:
      * 1. Valida o refresh token fornecido
      * 2. Busca o usuário associado ao refresh token
      * 3. Gera um novo access token para o usuário
      * 4. Retorna o novo access token junto com o refresh token (mantido)
-     * 
+     *
      * @param refreshTokenDTO DTO contendo o refresh token
      * @return ResponseEntity com LoginResponse contendo novo accessToken, refreshToken e tempo de expiração
      * @throws Exception se o refresh token for inválido ou expirado (tratado pelo Spring)
      */
+    @Operation(
+        summary = "Renovar access token",
+        description = "Renova o access token usando um refresh token válido, sem necessidade de fazer login novamente"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Token renovado com sucesso",
+            content = @Content(schema = @Schema(implementation = LoginResponse.class))
+        ),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Refresh token inválido ou expirado"
+        )
+    })
     @PostMapping("/refresh")
     public ResponseEntity<LoginResponse> refresh(@RequestBody RefreshTokenDTO refreshTokenDTO) {
         logger.info("Recebida requisição de refresh token");
