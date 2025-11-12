@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { lastValueFrom } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { GeminiResponse, GeminiRequest } from '../models/chat.model';
+import { GeminiResponse } from '../models/chat.model';
 import { LoggerService } from './logger.service';
 
 @Injectable({
@@ -24,27 +24,31 @@ export class GeminiService {
    */
   async sendMessage(prompt: string, conversationId?: string): Promise<GeminiResponse> {
     try {
-      // Inclui o conversationId na requisição se disponível
-      const url = conversationId
-        ? `${this.backendUrl}?conversationId=${conversationId}`
-        : this.backendUrl;
+      const options: { headers: Record<string, string>; withCredentials: boolean; params?: HttpParams } = {
+        headers: { 'Content-Type': 'text/plain' },
+        withCredentials: true,
+      };
 
-      const body: GeminiRequest = { prompt, conversationId };
+      if (conversationId) {
+        options.params = new HttpParams().set('conversationId', conversationId);
+      }
 
       this.logger.log('Enviando mensagem para Gemini', { conversationId });
 
-      const response = await lastValueFrom(this.http.post<GeminiResponse>(url, body));
+      const response = await lastValueFrom(
+        this.http.post<GeminiResponse>(this.backendUrl, prompt, options)
+      );
 
       this.logger.log('Resposta recebida do Gemini');
 
       return {
-        reply: response.reply || 'Sem resposta.',
+        response: response.response || 'Sem resposta.',
         conversationId: response.conversationId,
       };
     } catch (error) {
       this.logger.error('Erro ao enviar mensagem para o backend', error);
       return {
-        reply: 'Erro ao se conectar com o servidor. Tente novamente.',
+        response: 'Erro ao se conectar com o servidor. Tente novamente.',
         conversationId,
       };
     }

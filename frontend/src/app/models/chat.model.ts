@@ -5,11 +5,6 @@ export interface ChatMessage {
 }
 
 export interface GeminiResponse {
-  reply: string;
-  conversationId?: string;
-}
-
-export interface GeminiRequest {
-  prompt: string;
+  response: string;
   conversationId?: string;
 }

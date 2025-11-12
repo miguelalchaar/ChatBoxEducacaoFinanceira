@@ -93,7 +93,7 @@ export class ChatWidget {
       // Atualiza a última mensagem do bot com a resposta real
       this.messages[this.messages.length - 1] = {
         sender: 'bot',
-        text: result.reply,
+        text: result.response,
         timestamp: new Date(),
       };
     } catch (error) {
