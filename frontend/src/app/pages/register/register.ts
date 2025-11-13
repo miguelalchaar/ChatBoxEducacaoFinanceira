@@ -67,6 +67,7 @@ export class Register implements OnDestroy {
     this.authService
       .register({
         nome: nomeFantasia,
+        nomeFantasia,
         email,
         senha,
         cnpj,

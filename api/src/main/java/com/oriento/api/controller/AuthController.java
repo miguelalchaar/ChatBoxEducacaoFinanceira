@@ -3,6 +3,7 @@ package com.oriento.api.controller;
 import com.oriento.api.dto.LoginRequest;
 import com.oriento.api.dto.LoginResponse;
 import com.oriento.api.dto.RefreshTokenDTO;
+import com.oriento.api.dto.UsuarioResponse;
 import com.oriento.api.model.RefreshToken;
 import com.oriento.api.model.Usuario;
 import com.oriento.api.services.AuthService;
@@ -20,20 +21,23 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Controller responsável por gerenciar endpoints de autenticação.
  *
  * Endpoints disponíveis:
- * - POST /login: Autentica um usuário e retorna tokens JWT
- * - POST /refresh: Renova o access token usando um refresh token válido
+ * - POST /api/auth/login: Autentica um usuário e retorna tokens JWT
+ * - POST /api/auth/refresh: Renova o access token usando um refresh token válido
+ * - POST /api/auth/logout: Invalida o refresh token e encerra a sessão
  *
  * Este controller atua como uma camada fina, delegando toda a lógica de negócio
  * para o AuthService, mantendo a separação de responsabilidades.
  */
 @RestController
 @Tag(name = "Autenticação", description = "Endpoints para autenticação e gerenciamento de tokens JWT")
+@RequestMapping("/api/auth")
 public class AuthController {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
@@ -199,10 +203,43 @@ public class AuthController {
         
         // Retorna o novo access token junto com o refresh token (que permanece o mesmo)
         return ResponseEntity.ok(new LoginResponse(
-                novoAccessToken, 
-                refreshToken.getToken(), 
-                jwtService.getAccessTokenDuration()
+                novoAccessToken,
+                refreshToken.getToken(),
+                jwtService.getAccessTokenDuration(),
+                UsuarioResponse.fromEntity(usuario)
         ));
+    }
+
+    /**
+     * Endpoint para realizar logout do usuário, invalidando o refresh token atual.
+     *
+     * @param refreshTokenDTO DTO contendo o refresh token
+     * @return 204 No Content em caso de sucesso
+     */
+    @Operation(
+        summary = "Realizar logout",
+        description = "Invalida o refresh token atual e encerra a sessão do usuário"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "204",
+            description = "Logout realizado com sucesso"
+        ),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Refresh token não fornecido"
+        )
+    })
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(@RequestBody RefreshTokenDTO refreshTokenDTO) {
+        if (refreshTokenDTO == null || refreshTokenDTO.refreshToken() == null || refreshTokenDTO.refreshToken().isBlank()) {
+            logger.warn("Tentativa de logout sem refresh token");
+            return ResponseEntity.badRequest().build();
+        }
+
+        logger.info("Recebida requisição de logout");
+        refreshTokenService.deletarRefreshToken(refreshTokenDTO.refreshToken());
+        return ResponseEntity.noContent().build();
     }
 
 }

@@ -2,6 +2,7 @@ package com.oriento.api.services;
 
 import com.oriento.api.dto.LoginRequest;
 import com.oriento.api.dto.LoginResponse;
+import com.oriento.api.dto.UsuarioResponse;
 import com.oriento.api.model.Usuario;
 import com.oriento.api.repositories.UsuarioRepository;
 import org.slf4j.Logger;
@@ -166,7 +167,8 @@ public class AuthService {
         return new LoginResponse(
                 accessToken,
                 refreshToken.getToken(),
-                jwtService.getAccessTokenDuration()
+                jwtService.getAccessTokenDuration(),
+                UsuarioResponse.fromEntity(usuario.get())
         );
     }
 

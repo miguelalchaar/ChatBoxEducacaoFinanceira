@@ -9,6 +9,7 @@ export interface Usuario {
 
 export interface LoginResponse {
   accessToken: string;
+  refreshToken: string;
   expiresIn: number;
   usuario: Usuario;
 }
@@ -19,6 +20,7 @@ export interface RegisterPayload {
   senha: string;
   cnpj: string;
   razaoSocial?: string;
+  nomeFantasia?: string;
 }
 
 export interface ApiError {

@@ -26,7 +26,7 @@ import org.springframework.web.server.ResponseStatusException;
  * para pequenas e médias empresas (PMEs), utilizando a API do Google Gemini.
  *
  * Endpoints disponíveis:
- * - POST /oriento/ask: Envia uma pergunta ao assistente Oriento e recebe uma resposta
+ * - POST /api/oriento/ask: Envia uma pergunta ao assistente Oriento e recebe uma resposta
  *
  * Este controller atua como uma camada fina, delegando toda a lógica de processamento
  * para o GeminiService, mantendo a separação de responsabilidades.
@@ -35,7 +35,7 @@ import org.springframework.web.server.ResponseStatusException;
  * que apenas usuários autenticados possam interagir com o assistente.
  */
 @RestController
-@RequestMapping("/oriento")
+@RequestMapping("/api/oriento")
 @Tag(name = "Assistente Oriento", description = "Endpoints para interação com o assistente virtual de educação financeira")
 @SecurityRequirement(name = "Bearer Authentication")
 public class GeminiController {

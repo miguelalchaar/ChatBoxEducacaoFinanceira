@@ -67,8 +67,8 @@ public class OpenApiConfig {
 
                                 ## Como Usar
 
-                                1. Registre-se através do endpoint `/usuario/cadastro`
-                                2. Faça login no endpoint `/login` para obter o JWT token
+                                1. Registre-se através do endpoint `/api/auth/register`
+                                2. Faça login no endpoint `/api/auth/login` para obter o JWT token
                                 3. Clique no botão "Authorize" acima e insira o token no formato: `Bearer seu_token_aqui`
                                 4. Agora você pode testar todos os endpoints protegidos
 
@@ -104,13 +104,13 @@ public class OpenApiConfig {
                                 .scheme("bearer")
                                 .bearerFormat("JWT")
                                 .description("""
-                                        Insira o JWT token obtido através do endpoint `/login`.
+                                        Insira o JWT token obtido através do endpoint `/api/auth/login`.
 
                                         **Formato**: Bearer {seu_token_aqui}
 
                                         **Exemplo**: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
 
-                                        O token expira em 15 minutos. Use o endpoint `/refresh` para renová-lo.
+                                        O token expira em 15 minutos. Use o endpoint `/api/auth/refresh` para renová-lo.
                                         """)))
 
                 // Aplica autenticação JWT como requisito global para todos os endpoints

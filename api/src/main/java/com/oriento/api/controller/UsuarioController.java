@@ -16,13 +16,14 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Controller responsável por gerenciar endpoints relacionados a usuários.
  * 
  * Endpoints disponíveis:
- * - POST /cadastro: Cria um novo usuário no sistema
+ * - POST /api/auth/register: Cria um novo usuário no sistema
  * 
  * Este controller lida com:
  * - Validação de dados de entrada (via Bean Validation)
@@ -34,6 +35,7 @@ import org.springframework.web.bind.annotation.RestController;
  * configurado no AuthConfig.
  */
 @RestController
+@RequestMapping("/api/auth")
 public class UsuarioController {
 
     private static final Logger logger = LoggerFactory.getLogger(UsuarioController.class);
@@ -82,7 +84,7 @@ public class UsuarioController {
      * @return ResponseEntity com UsuarioCriadoResponse indicando sucesso ou erro
      */
     @Transactional
-    @PostMapping("/cadastro")
+    @PostMapping({"/cadastro", "/register"})
     public ResponseEntity<UsuarioCriadoResponse> novoUsuario(@Valid @RequestBody CriarUsuarioDTO dto) {
         logger.info("Recebida requisição de cadastro de novo usuário. Email: {}, CNPJ: {}", 
                 maskEmail(dto.email()), maskCnpj(dto.cnpj()));
